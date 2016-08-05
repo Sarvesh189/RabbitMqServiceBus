@@ -1,4 +1,5 @@
 ﻿using System;
+using RabbitMqBusClient.Messages;
 using RabbitMqServiceBus;
 
 
@@ -6,59 +7,33 @@ namespace RabbitMqBusClient
 {
     class Program
     {
+      
         static void Main(string[] args)
         {
-           var rmBus = new RabbitMqBus();
-            rmBus.SendCommand(new SendEmail2Command() { CommandId = Guid.NewGuid()});
 
-      //      var handler = new EmailCommandHandler("Email-End-Point");
-      //      handler.Handle<SendEmail2Command>();
+               Guid applicationId = Guid.NewGuid(); //one for an application
+              Guid busId = Guid.NewGuid(); //Each instance of publishing bus
+            var msg = Console.ReadLine();
+            while (msg != "Q")
+            {
+                var commandMessage = msg;
+                var rmBus = new RabbitMqBus();
+                rmBus.SendCommand(new SendEmailCommand()
+                {
+                   
+                    Message = commandMessage
+                });
+              
 
-
+                Console.WriteLine("published");
+                 msg = Console.ReadLine();
+            }
             Console.ReadKey();
         }
     }
 
-    [CommandMetaData("Email-End-Point")]
-    public class SendEmail2Command : BaseCommand
-    {
-        public SendEmail2Command()
-        {
+    
 
-        }
-
-
-    }
-
-    [CommandMetaData("Email-End-Point")]
-    public class SendEmailCommand : BaseCommand
-    {
-        public SendEmailCommand()
-        {
-
-        }
-
-
-    }
-    public class EmailCommandHandler : BaseCommandHandler
-    {
-        public EmailCommandHandler(string key):base(key)
-        {
-        }
-
-        public override void ProcessMessage<T>(T command)
-        {
-          Console.WriteLine(command);
-          SendEmail(command as SendEmail2Command);
-        }
-
-        private void SendEmail(SendEmail2Command objCommand)
-        {
-            Console.WriteLine(objCommand.CommandId);
-            throw new Exception("issue in processing");
-        }
-
-    }
-
+    
    
 }
