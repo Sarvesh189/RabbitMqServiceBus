@@ -7,11 +7,7 @@ using System.Configuration;
 
 namespace RabbitMqServiceBus.Configuration
 {
-   
-
-   
-
-    public class RabbitMqBusEndpointsCollection : ConfigurationElementCollection
+    internal class RabbitMqBusEndpointsCollection : ConfigurationElementCollection
     {
         protected override ConfigurationElement CreateNewElement()
         {
@@ -26,7 +22,7 @@ namespace RabbitMqServiceBus.Configuration
 
 
 
-    public class RabbitMqBusConfigurationSection: ConfigurationSection
+    internal class RabbitMqBusConfigurationSection: ConfigurationSection
     {
         public const string SectionName = "RabbitMqBusConfigurationSection";
 
@@ -41,6 +37,17 @@ namespace RabbitMqServiceBus.Configuration
             }
             set
             { this["rabbitMqConnection"] = value; }
+        }
+
+        [ConfigurationProperty("rabbitMqAlternateConnection",IsRequired = false)]
+        public RabbitMqAlternateConnection RabbitMqAlternateConnection
+        {
+            get
+            {
+                return (RabbitMqAlternateConnection)this["rabbitMqAlternateConnection"];
+            }
+            set
+            { this["rabbitMqAlternateConnection"] = value; }
         }
         [ConfigurationProperty("deadletterexchange")]
         public RabbitMqDeadLetterExchange DeadLetterExchange

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace RabbitMqServiceBus.Configuration
 {
-  public  class RabbitMqDeadLetterExchange:ConfigurationElement
+  internal  class RabbitMqDeadLetterExchange:ConfigurationElement
     {
         [ConfigurationProperty("exchange", IsRequired = true)]
         public string Exchange

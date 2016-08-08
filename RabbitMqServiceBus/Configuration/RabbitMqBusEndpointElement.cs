@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace RabbitMqServiceBus.Configuration
 {
-    public class RabbitMqBusEndpointElement : ConfigurationElement
+    internal class RabbitMqBusEndpointElement : ConfigurationElement
     {
         [ConfigurationProperty("name", IsRequired = true)]
         public string Name

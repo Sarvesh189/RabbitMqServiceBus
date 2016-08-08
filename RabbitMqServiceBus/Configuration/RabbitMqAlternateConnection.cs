@@ -7,8 +7,9 @@ using System.Threading.Tasks;
 
 namespace RabbitMqServiceBus.Configuration
 {
-    internal class RabbitMqConnection :RabbitMqBaseConnection
+    internal class RabbitMqAlternateConnection : RabbitMqBaseConnection
     {
+      
 
     }
 }

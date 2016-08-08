@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using RabbitMqServiceBus.Configuration;
+using RabbitMqServiceBus.Utility;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Framing;
 
@@ -45,19 +46,46 @@ namespace RabbitMqServiceBus
 
         private IConnection OpenConnection()
         {
-           
-               var connectionFactory = new ConnectionFactory();
-                connectionFactory.AutomaticRecoveryEnabled = true;
-                connectionFactory.HandshakeContinuationTimeout =TimeSpan.FromMinutes(int.Parse(_rabbitMqsection.RabbitMqConnection.ConnectionTimeout));
-                connectionFactory.ContinuationTimeout = TimeSpan.FromMinutes(int.Parse(_rabbitMqsection.RabbitMqConnection.ConnectionTimeout));
-                connectionFactory.UserName = _rabbitMqsection.RabbitMqConnection.UserName;
-                connectionFactory.Password = _rabbitMqsection.RabbitMqConnection.Password;
-                connectionFactory.Port = int.Parse(_rabbitMqsection.RabbitMqConnection.Port);
-                connectionFactory.Protocol = _protocol;
-                connectionFactory.VirtualHost = _rabbitMqsection.RabbitMqConnection.VHost;
-                connectionFactory.HostName = _rabbitMqsection.RabbitMqConnection.Hostname;
-                return connectionFactory.CreateConnection();
+            IConnection connection=null;
+            var connectionFactory = new ConnectionFactory();
+            connectionFactory = SetUpConnectionProperty(connectionFactory, _rabbitMqsection.RabbitMqConnection);
+            try
+            {
+                connection = connectionFactory.CreateConnection();
+            }
+            catch (Exception firstEx)
+            {
+                Logger.WriteError(firstEx.ToString());
+                try
+                {
+                    connectionFactory = SetUpConnectionProperty(connectionFactory,
+                        _rabbitMqsection.RabbitMqAlternateConnection);
+                    connection = connectionFactory.CreateConnection();
+                }
+                catch (Exception secEx)
+                {
+                    Logger.WriteError(secEx.ToString());
+                    throw;
+                }
+            }
+
+
+            return connection;
         }
+
+      private ConnectionFactory SetUpConnectionProperty(ConnectionFactory connectionFactory, RabbitMqBaseConnection rabbitMqConnection)
+      {
+            connectionFactory.AutomaticRecoveryEnabled = true;
+            connectionFactory.HandshakeContinuationTimeout = TimeSpan.FromMinutes(int.Parse(rabbitMqConnection.ConnectionTimeout));
+            connectionFactory.ContinuationTimeout = TimeSpan.FromMinutes(int.Parse(rabbitMqConnection.ConnectionTimeout));
+            connectionFactory.UserName = rabbitMqConnection.UserName;
+            connectionFactory.Password = rabbitMqConnection.Password;
+            connectionFactory.Port = int.Parse(rabbitMqConnection.Port);
+            connectionFactory.Protocol = _protocol;
+            connectionFactory.VirtualHost = rabbitMqConnection.VHost;
+            connectionFactory.HostName = rabbitMqConnection.Hostname;
+          return connectionFactory;
+      }
 
       private void InitializeSetup()
       {
