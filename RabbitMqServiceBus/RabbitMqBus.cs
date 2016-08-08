@@ -9,9 +9,6 @@ namespace RabbitMqServiceBus
 {
    public class RabbitMqBus:IBus
    {
-      
-
-       
        public void PublishEvent()
        {
            throw new NotImplementedException();

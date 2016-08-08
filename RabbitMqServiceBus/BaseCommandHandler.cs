@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using RabbitMqServiceBus.Utility;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -16,8 +13,10 @@ namespace RabbitMqServiceBus
        
         protected BaseCommandHandler(string key)
         {
+            Logger.WriteInfo("trying to get the instance of connection manager");
             _rabbitMqchannel = ConnectionManager.Instance.ChannelInstance;
-            this._key = key;
+            _key = key;
+            Logger.WriteInfo("connection manager is instanciated");
         }
 
         public abstract void ProcessMessage<T>(T command);
@@ -29,20 +28,24 @@ namespace RabbitMqServiceBus
                 var consumer = new EventingBasicConsumer(_rabbitMqchannel);
                 consumer.Received += (model, ea) =>
                 {
+                    Logger.WriteInfo("retrieving the message from queue");
                     deliveryTag = ea.DeliveryTag;
                     var body = ea.Body;
                     var message = Encoding.UTF8.GetString(body);
                     var basecommand = Serializer.DeserializeObject<T>(message);
                     ProcessMessage(basecommand);
+                    Logger.WriteInfo("message processed");
                     _rabbitMqchannel.BasicAck(ea.DeliveryTag, false);
+                    Logger.WriteInfo("Acknowledgement sent");
                 };
                 var messageProperty = MessagePropertyCollection.GetMessageProperty(_key);
                 _rabbitMqchannel.BasicConsume(queue: messageProperty.QueueName,
                                      noAck: false,
                                      consumer: consumer);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Logger.WriteError(ex.ToString());
                 _rabbitMqchannel.BasicNack(deliveryTag,false,false);
                 throw;
             }

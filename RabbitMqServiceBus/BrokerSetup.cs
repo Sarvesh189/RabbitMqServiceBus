@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Configuration;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using RabbitMqServiceBus.Configuration;
+using RabbitMqServiceBus.Utility;
 using RabbitMQ.Client;
 
 namespace RabbitMqServiceBus
@@ -21,8 +18,9 @@ namespace RabbitMqServiceBus
         private readonly RabbitMqBusConfigurationSection _rabbitMqsection;
         public BrokerSetup()
        {
-           
+           Logger.WriteInfo("Trying to retrieve configuration section");
             _rabbitMqsection = (RabbitMqBusConfigurationSection)ConfigurationManager.GetSection("RabbitMqBusConfigurationSection");
+            Logger.WriteInfo("Configuration section is defined");
         }
 
        public void SetupExchangeAndQueue(IModel channel)
@@ -33,14 +31,15 @@ namespace RabbitMqServiceBus
 
        private void SetUpDeadLetterExchange(IModel channel)
        {
+            Logger.WriteInfo("Trying to create dead-letter-exchange");
             channel.ExchangeDeclare(_rabbitMqsection.DeadLetterExchange.Exchange, _rabbitMqsection.DeadLetterExchange.ExchangeType, true);
-            
+            Logger.WriteInfo("Dead-letter-queue are created");
        }
 
 
        private void SetUpNormalExchanges(IModel channel)
        {
-          
+           Logger.WriteInfo("Normal exchange and queue setup starting");
            int ttl = 20; //default time in minute to live
             foreach (RabbitMqBusEndpointElement element in _rabbitMqsection.ConnectionManagerEndpoints)
             {
@@ -76,6 +75,7 @@ namespace RabbitMqServiceBus
                     channel.QueueBind(element.Queue, element.Exchange, element.Routingkey);
                 }
             }
+            Logger.WriteInfo("Normal exchange and queue are set up");
         }
    }
 }

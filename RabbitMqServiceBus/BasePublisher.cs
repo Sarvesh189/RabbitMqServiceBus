@@ -28,6 +28,7 @@ namespace RabbitMqServiceBus
 
         public void Publish<T>(T command)
         {
+            Logger.WriteInfo("trying to publish the message");
             var commandMetaDataAttribute = command.GetType().GetCustomAttribute<CommandMetaDataAttribute>();
             var messageProperty = MessagePropertyCollection.GetMessageProperty(commandMetaDataAttribute.Key);
             string strcommand = Serializer.SerializeObject(command);
@@ -36,6 +37,7 @@ namespace RabbitMqServiceBus
             properties.Persistent = true;
             properties.DeliveryMode = 2;
             _rabbitMqchannel.BasicPublish(messageProperty.ExchangeName, messageProperty.RoutingKey, true, properties, body);
+            Logger.WriteInfo("Message published");
         }
     }
 }

@@ -1,13 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Configuration;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using RabbitMqServiceBus.Configuration;
 using RabbitMqServiceBus.Utility;
 using RabbitMQ.Client;
-using RabbitMQ.Client.Framing;
 
 namespace RabbitMqServiceBus
 {
@@ -46,21 +41,25 @@ namespace RabbitMqServiceBus
 
         private IConnection OpenConnection()
         {
-            IConnection connection=null;
+            IConnection connection;
             var connectionFactory = new ConnectionFactory();
             connectionFactory = SetUpConnectionProperty(connectionFactory, _rabbitMqsection.RabbitMqConnection);
             try
             {
+                Logger.WriteInfo("Trying to establish primary connection");
                 connection = connectionFactory.CreateConnection();
+                Logger.WriteInfo("Primary connection established");
             }
             catch (Exception firstEx)
             {
                 Logger.WriteError(firstEx.ToString());
                 try
                 {
+                    Logger.WriteInfo("Trying to establish alternate connection");
                     connectionFactory = SetUpConnectionProperty(connectionFactory,
                         _rabbitMqsection.RabbitMqAlternateConnection);
                     connection = connectionFactory.CreateConnection();
+                    Logger.WriteInfo("Alternate connection established");
                 }
                 catch (Exception secEx)
                 {
@@ -101,11 +100,12 @@ namespace RabbitMqServiceBus
                 _rabbitmqConnection = OpenConnection();
             }
            
-
+            Logger.WriteInfo("trying to establish initialzed channel");
             IModel model = _rabbitmqConnection.CreateModel();
 
             _rabbitmqConnection.AutoClose = true;
 
+            Logger.WriteInfo("Channel initialized");
             return model;
         }
 
